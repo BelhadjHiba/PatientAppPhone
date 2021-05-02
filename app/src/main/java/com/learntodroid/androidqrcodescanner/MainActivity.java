@@ -13,6 +13,8 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
 import android.Manifest;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.util.Log;
@@ -38,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        final Context context = this;
         previewView = findViewById(R.id.activity_main_previewView);
 
         qrCodeFoundButton = findViewById(R.id.activity_main_qrCodeFoundButton);
@@ -48,6 +50,10 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Toast.makeText(getApplicationContext(), qrCode, Toast.LENGTH_SHORT).show();
                 Log.i(MainActivity.class.getSimpleName(), "QR Code Found: " + qrCode);
+                System.out.println("QR Code Found: " + qrCode);
+                Intent intent = new Intent(context, Greeting.class);
+                intent.putExtra("patient_KEY",qrCode);
+                startActivity(intent);
             }
         });
 
