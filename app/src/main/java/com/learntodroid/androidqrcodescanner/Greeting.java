@@ -14,11 +14,15 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class Greeting extends AppCompatActivity {
     String patientId;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_greeting);
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
         patientId = getIntent().getStringExtra("patient_KEY");
         System.out.println(patientId);
         final Context context = this;

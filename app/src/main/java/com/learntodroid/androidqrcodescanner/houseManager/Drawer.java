@@ -1,4 +1,4 @@
-package com.learntodroid.androidqrcodescanner;
+package com.learntodroid.androidqrcodescanner.houseManager;
 
 import java.util.Scanner;
 

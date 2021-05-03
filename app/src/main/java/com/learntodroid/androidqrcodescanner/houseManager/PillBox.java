@@ -1,10 +1,10 @@
-package com.learntodroid.androidqrcodescanner;
+package com.learntodroid.androidqrcodescanner.houseManager;
 
 import java.util.Scanner;
 
 public class PillBox {
     private String boxID;
-    private boolean boxState;
+    private boolean boxState = false;
     private Slot slot;
     private int nbSlots;
     private boolean boxLed = false;
@@ -17,6 +17,9 @@ public class PillBox {
         setBoxID(boxID);
         setBoxState(boxState);
         setNbSlots(nbSlots);
+    }
+
+    public PillBox() {
     }
 
     public String getBoxID() {
@@ -63,15 +66,18 @@ public class PillBox {
         this.boxLed = boxLed;
     }
 
-    public void onAlarmSet(){
+    public boolean onAlarmSet(){
+        isLocked = false;
         do {
-            isLocked = false;
-            setBoxLed(true);
+            boxLed = true;
             Scanner myObj = new Scanner(System.in);
-            setBoxState(myObj.nextBoolean());
-        } while ( getBoxLed()== false);
-        if (getBoxLed())
-            setBoxLed(false);
+            boxState = myObj.nextBoolean();
+        } while (boxState == false);
+        if (boxState == true){
+            boxLed = false;
+            return true;
+        } else return false;
+
     }
 
 

@@ -1,8 +1,10 @@
-package com.learntodroid.androidqrcodescanner;
+package com.learntodroid.androidqrcodescanner.houseManager;
+
+import com.learntodroid.androidqrcodescanner.houseManager.PillBox;
 
 import java.util.Scanner;
 
-public class Slot {
+public class Slot extends PillBox {
     private int slotID = 0;
     private boolean slotLed = false;
     private boolean slotState = false;
@@ -10,6 +12,7 @@ public class Slot {
 
     public Slot(){}
     public Slot( boolean slotLed, boolean slotState) {
+        super();
         setSlotLed(slotLed);
         setSlotState(slotState);
     }
