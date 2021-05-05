@@ -33,9 +33,9 @@ public class AlarmHandler {
     // setRepeating() lets you specify a precise custom interval--in this case,
     // 1 minute.
 
-    alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,1000*30,
-    1000 * 120  , alarmIntent);}
-//        alarmMgr.set(AlarmManager.RTC_WAKEUP,1000*60,alarmIntent);}
+//    alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,1000*15,
+//    1000 * 30  , alarmIntent);}
+        alarmMgr.set(AlarmManager.RTC_WAKEUP,1000*30,alarmIntent);}
 
     public void cancelAlarmManager(){
         Intent intent = new Intent(context, ExecutableService.class);

@@ -12,9 +12,6 @@ public class ExecutableService extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-
-
-
         Intent alarmIntent = new Intent(context, WakeupAlarmActivity.class);
         alarmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         //open Activitiy
