@@ -4,6 +4,7 @@ import android.annotation.TargetApi;
 import android.app.KeyguardManager;
 
 import android.media.AudioManager;
+import android.media.MediaDrm;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -29,6 +30,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 
 public class WakeupAlarmActivity extends AppCompatActivity {
@@ -38,45 +40,99 @@ public class WakeupAlarmActivity extends AppCompatActivity {
     Character a='a';
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private static Boolean  stateBox=true;
-
+    boolean done = false;
+    boolean slotState = false;
     @Override
         protected void onCreate(Bundle savedInstanceState) {
 
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_wakeup);
 //            Handler handler = new Handler();
+do {
 
-            db.collection("PillBox").document("Ibuprofen").addSnapshotListener(new EventListener<DocumentSnapshot>() {
-                @Override
-                public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
-                    if(error!=null)
-                    {
-                        Log.e(TAG,"OnEvent ",error);
 
-                        return;
+    db.collection("PillBox").document("Ibuprofen").addSnapshotListener(new EventListener<DocumentSnapshot>() {
+        @Override
+        public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+            if (error != null) {
+                Log.e(TAG, "OnEvent ", error);
+
+                return;
+            }
+            if (value != null) {
+
+                System.out.println(value.getBoolean("boxState"));
+
+                if (!value.getBoolean("boxState")) {
+                    for (int i = 0; i < 100; i++) {
+                        if (value.getBoolean("boxState") == true)
+                            break;
+                        eventSpeaker = new EventSpeaker(getApplicationContext(), "open the  pillbox");
+//                                   try {
+//                                       TimeUnit.SECONDS.sleep(10);
+//                                   } catch (InterruptedException e) {
+//                                       e.printStackTrace();
+//                                   }
+
                     }
-                    if(value!=null){
-                        System.out.println(value.getBoolean("boxState"));
-
-                        if (value.getBoolean("boxState")) {
-                            System.out.println("-----------closed");
-                            eventSpeaker=new EventSpeaker(getApplicationContext(),"open the  pillbox");
-                        } else if (!value.getBoolean("boxState")) {
-                            System.out.println("--------------Opened");
-
-                            eventSpeaker=new EventSpeaker(getApplicationContext(),"Take Pills in the luminous slot");
-                        }
-
-                    }
-                    else{
-                        Log.e("db","onEvent NULL");
-                    }
+//                                System.out.println("-----------closed");
+//                                eventSpeaker=new EventSpeaker(getApplicationContext(),"open the  pillbox");
                 }
-            });
+                if (value.getBoolean("boxState")) {
+                    System.out.println("--------------Opened");
+                    do {
 
 
+                        value.getReference().collection("Slot").document("2").addSnapshotListener(new EventListener<DocumentSnapshot>() {
+                            @Override
+                            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                                if (error != null) {
+                                    Log.e(TAG, "OnEvent ", error);
+
+                                    return;
+                                }
+                                if (value != null) {
+                                    System.out.println(value.getBoolean("slotState"));
+
+                                    if (!value.getBoolean("slotState")) {
+                                        for (int i = 0; i < 100; i++) {
+                                            eventSpeaker = new EventSpeaker(getApplicationContext(), "Open the luminous slot");
+                                            //                                   try {
+                                            //                                       TimeUnit.SECONDS.sleep(10);
+                                            //                                   } catch (InterruptedException e) {
+                                            //                                       e.printStackTrace();
+                                            //                                   }
+                                            if (value.getBoolean("slotState") == true)
+                                                break;
+                                        }
+                                        //                                System.out.println("-----------closed");
+                                        //                                eventSpeaker=new EventSpeaker(getApplicationContext(),"open the  pillbox");
+                                    } else if (value.getBoolean("slotState") == true) {
+                                        for (int i = 0; i < 100; i++) {
+                                            eventSpeaker = new EventSpeaker(getApplicationContext(), "Take Pills in the luminous slot");
+                                            //                                   try {
+                                            //                                       TimeUnit.SECONDS.sleep(10);
+                                            //                                   } catch (InterruptedException e) {
+                                            //                                       e.printStackTrace();
+                                            //                                   }
+                                            if (value.getBoolean("isEmpty") == true) {
+                                                break;
+                                            }
+                                        }
+                                    } else if (value.getBoolean("isEmpty") == true) {
+                                        eventSpeaker = new EventSpeaker(getApplicationContext(), "Good Job");
+                                    }
 
 
+                                }
+                            }
+                        });
+                    } while (true);
+                }
+            }
+        }
+
+    });
 
 
 //            eventSpeaker.setText("Open the Fridge");
@@ -137,7 +193,8 @@ public class WakeupAlarmActivity extends AppCompatActivity {
 //                }
 //            });
 
-            setVolumeControlStream(AudioManager.STREAM_MUSIC);
+    setVolumeControlStream(AudioManager.STREAM_MUSIC);
+}while (slotState == false);
         }
 
 
@@ -163,6 +220,9 @@ public class WakeupAlarmActivity extends AppCompatActivity {
                 mTts.stop();
                 mTts.shutdown();
             }
+        }
+        public void loopSpeak(){
+
         }
 
 
