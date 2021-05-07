@@ -39,11 +39,13 @@ public class EventSpeaker implements TextToSpeech.OnInitListener {
                 Toast.makeText(context, "This language is not supported", Toast.LENGTH_SHORT).show();
             }
             else{
-                Log.v("TTS","onInit succeeded");
-                     speak(text);
+
+                    speak(text);
+
             }
         } else {
             Toast.makeText(context, "Initialization failed", Toast.LENGTH_SHORT).show();        }
+
     }
     public void speak(String s){
 
@@ -71,4 +73,8 @@ public class EventSpeaker implements TextToSpeech.OnInitListener {
         }
 
     }
+
+
+
+
 }
