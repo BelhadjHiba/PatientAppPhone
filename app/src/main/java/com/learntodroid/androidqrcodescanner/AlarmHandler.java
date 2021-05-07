@@ -24,8 +24,8 @@ public class AlarmHandler {
 // Set the alarm to start at 8:30 a.m.
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 16);
-        calendar.set(Calendar.MINUTE,41);
+        calendar.set(Calendar.HOUR_OF_DAY, 17);
+        calendar.set(Calendar.MINUTE,35);
         calendar.set(Calendar.SECOND,0);
         System.out.println(calendar.getTimeInMillis());
 
@@ -35,7 +35,7 @@ public class AlarmHandler {
 
 //    alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,1000*15,
 //    1000 * 30  , alarmIntent);}
-        alarmMgr.set(AlarmManager.RTC_WAKEUP,1000*30,alarmIntent);}
+        alarmMgr.set(AlarmManager.RTC_WAKEUP,1000,alarmIntent);}
 
     public void cancelAlarmManager(){
         Intent intent = new Intent(context, ExecutableService.class);

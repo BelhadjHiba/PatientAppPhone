@@ -40,15 +40,25 @@ public class WakeupAlarmActivity extends AppCompatActivity {
     Character a='a';
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private static Boolean  stateBox=true;
-    boolean done = false;
-    boolean slotState = false;
+
+   String text = "";
+    Handler handler = new Handler();
+   private Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+//
+            eventSpeaker = new EventSpeaker(getApplicationContext(), text);
+            handler.postDelayed(this,5000);
+
+        }
+    };
     @Override
         protected void onCreate(Bundle savedInstanceState) {
 
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_wakeup);
-//            Handler handler = new Handler();
-do {
+//
+//do {
 
 
     db.collection("PillBox").document("Ibuprofen").addSnapshotListener(new EventListener<DocumentSnapshot>() {
@@ -63,24 +73,38 @@ do {
 
                 System.out.println(value.getBoolean("boxState"));
 
-                if (!value.getBoolean("boxState")) {
-                    for (int i = 0; i < 100; i++) {
-                        if (value.getBoolean("boxState") == true)
-                            break;
-                        eventSpeaker = new EventSpeaker(getApplicationContext(), "open the  pillbox");
-//                                   try {
-//                                       TimeUnit.SECONDS.sleep(10);
-//                                   } catch (InterruptedException e) {
-//                                       e.printStackTrace();
-//                                   }
-
-                    }
-//                                System.out.println("-----------closed");
-//                                eventSpeaker=new EventSpeaker(getApplicationContext(),"open the  pillbox");
+                if(!value.getBoolean("boxState"))
+                {
+                    text="Open the pillBox";
+                    runnable.run();
                 }
-                if (value.getBoolean("boxState")) {
+                else {
+//                    handler.removeCallbacks(runnable);
+
+////                    for (int i = 0; i < 5; i++) {
+//
+////                            break;
+//
+//
+//                    handler.postDelayed(runnable,1000);
+//
+//
+//
+//
+////                    if (value.getBoolean("boxState") == true )
+////                        eventSpeaker.onDestroy();
+////                                   try {
+////                                       TimeUnit.SECONDS.sleep(10);
+////                                   } catch (InterruptedException e) {
+////                                       e.printStackTrace();
+////                                   }
+//
+////                    }
+//
+////                                System.out.println("-----------closed");
+////                                eventSpeaker=new EventSpeaker(getApplicationContext(),"open the  pillbox");
+//                }
                     System.out.println("--------------Opened");
-                    do {
 
 
                         value.getReference().collection("Slot").document("2").addSnapshotListener(new EventListener<DocumentSnapshot>() {
@@ -95,39 +119,41 @@ do {
                                     System.out.println(value.getBoolean("slotState"));
 
                                     if (!value.getBoolean("slotState")) {
-                                        for (int i = 0; i < 100; i++) {
-                                            eventSpeaker = new EventSpeaker(getApplicationContext(), "Open the luminous slot");
-                                            //                                   try {
+                                           text= "Open the luminous slot";
+
+                                        runnable.run();
+
+                                        //                                   try {
                                             //                                       TimeUnit.SECONDS.sleep(10);
                                             //                                   } catch (InterruptedException e) {
                                             //                                       e.printStackTrace();
                                             //                                   }
-                                            if (value.getBoolean("slotState") == true)
-                                                break;
+
                                         }
                                         //                                System.out.println("-----------closed");
                                         //                                eventSpeaker=new EventSpeaker(getApplicationContext(),"open the  pillbox");
-                                    } else if (value.getBoolean("slotState") == true) {
-                                        for (int i = 0; i < 100; i++) {
-                                            eventSpeaker = new EventSpeaker(getApplicationContext(), "Take Pills in the luminous slot");
+                                    else if (value.getBoolean("slotState") == true) {
+
+                                            text= "Take Pills in the luminous slot";
+                                            runnable.run();
                                             //                                   try {
                                             //                                       TimeUnit.SECONDS.sleep(10);
                                             //                                   } catch (InterruptedException e) {
                                             //                                       e.printStackTrace();
                                             //                                   }
-                                            if (value.getBoolean("isEmpty") == true) {
-                                                break;
-                                            }
-                                        }
-                                    } else if (value.getBoolean("isEmpty") == true) {
-                                        eventSpeaker = new EventSpeaker(getApplicationContext(), "Good Job");
+
+
+                                    }
+
+                                    if (value.getBoolean("isEmpty") == true) {
+                                        handler.removeCallbacks(runnable);
                                     }
 
 
                                 }
                             }
                         });
-                    } while (true);
+
                 }
             }
         }
@@ -194,7 +220,7 @@ do {
 //            });
 
     setVolumeControlStream(AudioManager.STREAM_MUSIC);
-}while (slotState == false);
+//}while (slotState == false);
         }
 
 
