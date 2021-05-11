@@ -5,14 +5,18 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
+import com.google.firebase.Timestamp;
+import com.google.type.DateTime;
+
 import java.util.Calendar;
 import java.util.Date;
 
 public class AlarmHandler {
     private final Context context;
-
-    public AlarmHandler(Context context) {
+    private final com.google.firebase.Timestamp time;
+    public AlarmHandler(Context context, Timestamp time) {
         this.context = context;
+        this.time=time;
     }
 
     public void setAlarmManager() {
@@ -35,7 +39,9 @@ public class AlarmHandler {
 
 //    alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,1000*15,
 //    1000 * 30  , alarmIntent);}
-        alarmMgr.set(AlarmManager.RTC_WAKEUP,1000,alarmIntent);}
+        alarmMgr.set(AlarmManager.RTC_WAKEUP,
+                time.getSeconds(),
+                alarmIntent);}
 
     public void cancelAlarmManager(){
         Intent intent = new Intent(context, ExecutableService.class);

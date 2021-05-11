@@ -147,6 +147,7 @@ public class WakeupAlarmActivity extends AppCompatActivity {
 
                                     if (value.getBoolean("isEmpty") == true) {
                                         handler.removeCallbacks(runnable);
+                                        finish();
                                     }
 
 
@@ -246,9 +247,6 @@ public class WakeupAlarmActivity extends AppCompatActivity {
                 mTts.stop();
                 mTts.shutdown();
             }
-        }
-        public void loopSpeak(){
-
         }
 
 
