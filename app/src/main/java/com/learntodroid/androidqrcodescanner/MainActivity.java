@@ -23,8 +23,17 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.lang.reflect.Type;
+import java.sql.Timestamp;
+import java.util.Calendar;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 public class    MainActivity extends AppCompatActivity {
@@ -40,9 +49,27 @@ public class    MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        AlarmHandler alarmHandler = new AlarmHandler(this);
-        alarmHandler.cancelAlarmManager();
-        alarmHandler.setAlarmManager();
+        FirebaseFirestore.getInstance()
+                .collection("Events")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            List<DocumentSnapshot> myListOfDocuments = task.getResult().getDocuments();
+                            Log.e("Snapshot", String.valueOf(myListOfDocuments));
+                            for (DocumentSnapshot s:myListOfDocuments)
+                            {
+                                System.out.println(s.get("time").getClass().getName());
+                                Log.e("DOC", String.valueOf(s));
+                                 new AlarmHandler(getApplicationContext(), (com.google.firebase.Timestamp) s.get("time")).setAlarmManager();
+
+
+                            }
+                        }
+                    }
+                });
+
         Toast.makeText(this, "Alarm set", Toast.LENGTH_SHORT).show();
 
 //        final Context context = this;
