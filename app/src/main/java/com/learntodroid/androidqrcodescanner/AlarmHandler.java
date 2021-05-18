@@ -4,52 +4,124 @@ import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.net.nsd.NsdManager;
+import android.provider.CalendarContract;
+import android.util.Log;
+
+import androidx.annotation.Nullable;
 
 import com.google.firebase.Timestamp;
-import com.google.type.DateTime;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldPath;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 
+import java.sql.Time;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+
+import static java.lang.System.currentTimeMillis;
+
 
 public class AlarmHandler {
     private final Context context;
-    private final com.google.firebase.Timestamp time;
-    public AlarmHandler(Context context, Timestamp time) {
+    private long Interval;
+    private  FirebaseFirestore db=FirebaseFirestore.getInstance();
+    private Boolean Stop=false;
+    public AlarmHandler(Context context) {
         this.context = context;
-        this.time=time;
+
+
     }
-
-    public void setAlarmManager() {
+//
+    public void setAlarmManager(Timestamp time, int id ) {
 //        alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
-        Intent intent = new Intent(context, ExecutableService.class);
-        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, 2, intent, 0);
         AlarmManager alarmMgr=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-
-// Set the alarm to start at 8:30 a.m.
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 17);
-        calendar.set(Calendar.MINUTE,35);
-        calendar.set(Calendar.SECOND,0);
-        System.out.println(calendar.getTimeInMillis());
-
-
-    // setRepeating() lets you specify a precise custom interval--in this case,
-    // 1 minute.
-
-//    alarmMgr.setRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP,1000*15,
-//    1000 * 30  , alarmIntent);}
-        alarmMgr.set(AlarmManager.RTC_WAKEUP,
-                time.getSeconds(),
-                alarmIntent);}
-
-    public void cancelAlarmManager(){
         Intent intent = new Intent(context, ExecutableService.class);
-        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, 2, intent, 0);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, id, intent, 0);
+        alarmMgr.setExact(AlarmManager.RTC_WAKEUP,
+                time.getSeconds()*1000,
+//                1000,
+                alarmIntent);
+
+
+    }
+    
+    public void cancelAlarmManager(int id){
+        Intent intent = new Intent(context, ExecutableService.class);
+        PendingIntent alarmIntent = PendingIntent.getBroadcast(context, id, intent, 0);
         AlarmManager alarmMgr=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         if(alarmMgr!=null)
         {
             alarmMgr.cancel(alarmIntent);
         }
     }
-}
+    public void scheduleRepeating(DocumentSnapshot doc,int id ){
+        Timestamp endTime=doc.getTimestamp("endTime"),startTime=doc.getTimestamp("startTime"),sleepTime=doc.getTimestamp("sleepTime");
+        switch((String)doc.get("repeat")) {
+            case "everyday": {
+                Log.e("case1", "true");
+                    if (endTime != null) {
+                        if (startTime.getSeconds() <= endTime.getSeconds()) {
+                            Log.e("everydayWithEndTime","true");
+                            setAlarmManager(startTime, id);
+                            db.collection("Events").document(doc.getId()).update("startTime", new Timestamp(new Date(startTime.getSeconds() * 1000 + AlarmManager.INTERVAL_DAY)));
+                        } else {
+                            cancelAlarmManager(id);
+                        }
+                    } else {
+                        Log.e("everydayWithoutEndTime","true");
+                        setAlarmManager(startTime, id);
+                        db.collection("Events").document(doc.getId()).update("startTime", new Timestamp(new Date(startTime.getSeconds() * 1000 + AlarmManager.INTERVAL_DAY)));
+                    }
+                break;
+            }
+
+
+
+            case "everyWeek": {
+                    if (endTime != null) {
+                        if(startTime.getSeconds()<endTime.getSeconds()) {
+                            Log.e("everyweekWithEndTime","true");
+                            setAlarmManager(doc.getTimestamp("startTime"),id);
+                            List<Object> weekDays = (List<Object>) doc.get("weekDays");
+                            Calendar cal = Calendar.getInstance();
+                            cal.setTimeInMillis(currentTimeMillis());
+                            int start = cal.get(Calendar.DAY_OF_WEEK);
+                            start--;
+                            int i=1;
+                            while ((boolean)weekDays.get((start+1)%7)==false){
+                                start++;
+                                i++;
+                            }
+                            db.collection("Events").document(doc.getId()).update("startTime",new Timestamp(new Date(startTime.getSeconds()*1000+i*AlarmManager.INTERVAL_DAY)));
+
+                        }
+
+                    }else {
+                        Log.e("everyweekWithoutEndTime","true");
+
+                        setAlarmManager(startTime, id);
+                        db.collection("Events").document(doc.getId()).update("startTime", startTime.getSeconds() * 1000 + Constants.IntervalMonth);
+                    }
+                break;
+            }
+            case "everyMonth":{
+                if(endTime!=null){
+                    if(startTime.getSeconds()<=endTime.getSeconds()){
+
+
+                    }
+                }
+                break;
+            }
+
+
+            }
+        }
+    }
+
+

@@ -35,6 +35,13 @@
                 <action android:name="android.intent.action.MAIN"></action>
             </intent-filter>
         </receiver>
+        <receiver android:name=".SchedulingBroadcast"
+            android:enabled="true"
+            android:directBootAware="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"></action>
+            </intent-filter>
+        </receiver>
         <activity
 
             android:name=".WakeupAlarmActivity"
