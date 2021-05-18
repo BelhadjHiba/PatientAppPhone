@@ -3,20 +3,24 @@ package com.learntodroid.androidqrcodescanner;
 import android.annotation.TargetApi;
 import android.app.KeyguardManager;
 
+import android.content.Intent;
 import android.media.AudioManager;
 import android.media.MediaDrm;
+import android.net.nsd.NsdManager;
 import android.os.Build;
 import android.os.Bundle;
 
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
+import android.view.View;
 import android.view.WindowManager;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.widget.Button;
 import android.widget.Switch;
 import android.widget.Toast;
 
@@ -24,6 +28,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -40,7 +47,7 @@ public class WakeupAlarmActivity extends AppCompatActivity {
     Character a='a';
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private static Boolean  stateBox=true;
-
+    private Boolean Stop=false;
    String text = "";
     Handler handler = new Handler();
    private Runnable runnable = new Runnable() {
@@ -52,114 +59,137 @@ public class WakeupAlarmActivity extends AppCompatActivity {
 
         }
     };
+//    int stop;
     @Override
         protected void onCreate(Bundle savedInstanceState) {
 
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_wakeup);
+//             stop= getIntent().getExtras().getInt("Stop");
 //
 //do {
 
 
-    db.collection("PillBox").document("Ibuprofen").addSnapshotListener(new EventListener<DocumentSnapshot>() {
-        @Override
-        public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
-            if (error != null) {
-                Log.e(TAG, "OnEvent ", error);
-
-                return;
-            }
-            if (value != null) {
-
-                System.out.println(value.getBoolean("boxState"));
-
-                if(!value.getBoolean("boxState"))
-                {
-                    text="Open the pillBox";
-                    runnable.run();
-                }
-                else {
-//                    handler.removeCallbacks(runnable);
-
-////                    for (int i = 0; i < 5; i++) {
+//            ListenerRegistration rg= db.collection("PillBox").whereEqualTo("isLocked",false).whereEqualTo("boxLed",true).
+//                    addSnapshotListener(new EventListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+//    //                    if(stop==0) {
+//                        if (error != null) {
+//                            Log.e(TAG, "OnEvent ", error);
 //
-////                            break;
+//                            return;
+//                        }
+//                        if (value != null) {
+//                           Log.e("Document changes", String.valueOf(value)) ;
+//                            for (QueryDocumentSnapshot doc : value) {
+//                                if (!doc.getBoolean("boxState")) {
+//                                    text = "Open the pillBox";
+//                                    runnable.run();
+//                                    Log.e("doc id",doc.getId());
+//                                }
+//                                else {
+//                                    //                    handler.removeCallbacks(runnable);
+//
+//                                    ////                    for (int i = 0; i < 5; i++) {
+//                                    //
+//                                    ////                            break;
+//                                    //
+//                                    //
+//                                    //                    handler.postDelayed(runnable,1000);
+//                                    //
+//                                    //
+//                                    //
+//                                    //
+//                                    ////                    if (value.getBoolean("boxState") == true )
+//                                    ////                        eventSpeaker.onDestroy();
+//                                    ////                                   try {
+//                                    ////                                       TimeUnit.SECONDS.sleep(10);
+//                                    ////                                   } catch (InterruptedException e) {
+//                                    ////                                       e.printStackTrace();
+//                                    ////                                   }
+//                                    //
+//                                    ////                    }
+//                                    //
+//                                    ////                                System.out.println("-----------closed");
+//                                    ////                                eventSpeaker=new EventSpeaker(getApplicationContext(),"open the  pillbox");
+//                                    //                }
+//                                    System.out.println("--------------Opened");
 //
 //
-//                    handler.postDelayed(runnable,1000);
+//                                    ListenerRegistration registration0 = doc.getReference().collection("Slot").whereEqualTo("isLocked",false).addSnapshotListener(new EventListener<QuerySnapshot>() {
+//                                        @Override
+//                                        public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+//                                            if (error != null) {
+//                                                Log.e(TAG, "OnEvent ", error);
+//
+//                                                return;
+//                                            }
+//                                            if (value != null) {
+//                                                for (QueryDocumentSnapshot doc : value){
+//                                                    System.out.println(doc);
+//
+//                                                    if (doc.getBoolean("slotState")==false) {
+//                                                        text = "Open the luminous slot";
+//                                                        runnable.run();
+//                                                        Log.e("doc id",doc.getId());
 //
 //
+//                                                        //                                   try {
+//                                                        //                                       TimeUnit.SECONDS.sleep(10);
+//                                                        //                                   } catch (InterruptedException e) {
+//                                                        //                                       e.printStackTrace();
+//                                                        //                                   }
+//
+//                                                    }
+//                                                    //                                System.out.println("-----------closed");
+//                                                    //                                eventSpeaker=new EventSpeaker(getApplicationContext(),"open the  pillbox");
+//                                                    else if (doc.getBoolean("slotState") == true) {
+//
+//                                                        text = "Take Pills in the luminous slot";
+//                                                        runnable.run();
+//                                                        Log.e("doc id",doc.getId());
+//
+//                                                        //                                   try {
+//                                                        //                                       TimeUnit.SECONDS.sleep(10);
+//                                                        //                                   } catch (InterruptedException e) {
+//                                                        //                                       e.printStackTrace();
+//                                                        //                                   }
 //
 //
-////                    if (value.getBoolean("boxState") == true )
-////                        eventSpeaker.onDestroy();
-////                                   try {
-////                                       TimeUnit.SECONDS.sleep(10);
-////                                   } catch (InterruptedException e) {
-////                                       e.printStackTrace();
-////                                   }
+//                                                    }
 //
-////                    }
+//                                                    if (doc.getBoolean("isEmpty") == true) {
+//                                                        Log.d("finished",doc.getId()+"Done");
+//                                                        handler.removeCallbacks(runnable);
+//                                                        if (mTts != null) {
+//                                                            Log.v(TAG, "onDestroy: shutdown TTS");
+//                                                            mTts.stop();
+//                                                            mTts.shutdown();
+//                                                        }
 //
-////                                System.out.println("-----------closed");
-////                                eventSpeaker=new EventSpeaker(getApplicationContext(),"open the  pillbox");
-//                }
-                    System.out.println("--------------Opened");
+//                                                        Stop = true;
+//                                                        }
+//                                                    }
+//                                                }
+//                                            }
+////
+////
+//                                    });
+//                                    if(Stop)
+//                                        registration0.remove();
+//
+//                                }
+//                            }
+//                        }
+//                    }
+//            });
+//        if(Stop){
+//            rg.remove();
+//            finish();
+//        }
+Log.e("Alarm","WORKING");
 
-
-                        value.getReference().collection("Slot").document("2").addSnapshotListener(new EventListener<DocumentSnapshot>() {
-                            @Override
-                            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
-                                if (error != null) {
-                                    Log.e(TAG, "OnEvent ", error);
-
-                                    return;
-                                }
-                                if (value != null) {
-                                    System.out.println(value.getBoolean("slotState"));
-
-                                    if (!value.getBoolean("slotState")) {
-                                           text= "Open the luminous slot";
-
-                                        runnable.run();
-
-                                        //                                   try {
-                                            //                                       TimeUnit.SECONDS.sleep(10);
-                                            //                                   } catch (InterruptedException e) {
-                                            //                                       e.printStackTrace();
-                                            //                                   }
-
-                                        }
-                                        //                                System.out.println("-----------closed");
-                                        //                                eventSpeaker=new EventSpeaker(getApplicationContext(),"open the  pillbox");
-                                    else if (value.getBoolean("slotState") == true) {
-
-                                            text= "Take Pills in the luminous slot";
-                                            runnable.run();
-                                            //                                   try {
-                                            //                                       TimeUnit.SECONDS.sleep(10);
-                                            //                                   } catch (InterruptedException e) {
-                                            //                                       e.printStackTrace();
-                                            //                                   }
-
-
-                                    }
-
-                                    if (value.getBoolean("isEmpty") == true) {
-                                        handler.removeCallbacks(runnable);
-                                        finish();
-                                    }
-
-
-                                }
-                            }
-                        });
-
-                }
-            }
-        }
-
-    });
 
 
 //            eventSpeaker.setText("Open the Fridge");
@@ -238,16 +268,7 @@ public class WakeupAlarmActivity extends AppCompatActivity {
             mTts.speak(s, TextToSpeech.QUEUE_ADD, param);
         }
     }
-    @Override
-    protected void onDestroy(){
-            super.onDestroy();
-            // Don't forget to shutdown tts!
-            if (mTts != null) {
-                Log.v(TAG, "onDestroy: shutdown TTS");
-                mTts.stop();
-                mTts.shutdown();
-            }
-        }
+
 
 
 }
