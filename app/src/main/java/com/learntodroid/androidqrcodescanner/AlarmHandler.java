@@ -62,59 +62,74 @@ public class AlarmHandler {
     public void scheduleRepeating(DocumentSnapshot doc,int id ){
         Timestamp endTime=doc.getTimestamp("endTime"),startTime=doc.getTimestamp("startTime"),sleepTime=doc.getTimestamp("sleepTime");
         switch((String)doc.get("repeat")) {
-            case "everyday": {
+            case "EveryDay": {
                 Log.e("case1", "true");
-                    if (endTime != null) {
-                        if (startTime.getSeconds() <= endTime.getSeconds()) {
-                            Log.e("everydayWithEndTime","true");
-                            setAlarmManager(startTime, id);
-                            db.collection("Events").document(doc.getId()).update("startTime", new Timestamp(new Date(startTime.getSeconds() * 1000 + AlarmManager.INTERVAL_DAY)));
-                        } else {
-                            cancelAlarmManager(id);
-                        }
-                    } else {
-                        Log.e("everydayWithoutEndTime","true");
+                if (endTime != null) {
+                    if (startTime.getSeconds() <= endTime.getSeconds()) {
+                        Log.e("everydayWithEndTime","true");
                         setAlarmManager(startTime, id);
                         db.collection("Events").document(doc.getId()).update("startTime", new Timestamp(new Date(startTime.getSeconds() * 1000 + AlarmManager.INTERVAL_DAY)));
+                    } else {
+                        cancelAlarmManager(id);
                     }
+                } else {
+                    Log.e("everydayWithoutEndTime","true");
+                    setAlarmManager(startTime, id);
+                    db.collection("Events").document(doc.getId()).update("startTime", new Timestamp(new Date(startTime.getSeconds() * 1000 + AlarmManager.INTERVAL_DAY)));
+                }
                 break;
             }
-
-
-
-            case "everyWeek": {
-                    if (endTime != null) {
-                        if(startTime.getSeconds()<endTime.getSeconds()) {
-                            Log.e("everyweekWithEndTime","true");
-                            setAlarmManager(doc.getTimestamp("startTime"),id);
-                            List<Object> weekDays = (List<Object>) doc.get("weekDays");
-                            Calendar cal = Calendar.getInstance();
-                            cal.setTimeInMillis(currentTimeMillis());
-                            int start = cal.get(Calendar.DAY_OF_WEEK);
-                            start--;
-                            int i=1;
-                            while ((boolean)weekDays.get((start+1)%7)==false){
-                                start++;
-                                i++;
-                            }
-                            db.collection("Events").document(doc.getId()).update("startTime",new Timestamp(new Date(startTime.getSeconds()*1000+i*AlarmManager.INTERVAL_DAY)));
-
+            case "EveryWeek": {
+                if (endTime != null) {
+                    if(startTime.getSeconds()<endTime.getSeconds()) {
+                        Log.e("everyWeekWithEndTime","true");
+                        setAlarmManager(doc.getTimestamp("startTime"),id);
+                        List<Object> weekDays = (List<Object>) doc.get("weekDays");
+                        Calendar cal = Calendar.getInstance();
+                        cal.setTimeInMillis(currentTimeMillis());
+                        int start = cal.get(Calendar.DAY_OF_WEEK);
+                        start--;
+                        int i=1;
+                        while ((boolean)weekDays.get((start+1)%7)==false){
+                            start++;
+                            i++;
                         }
+                        db.collection("Events").document(doc.getId()).
+                                update("startTime",new Timestamp(new Date(startTime.getSeconds()*1000+i*AlarmManager.INTERVAL_DAY)));
 
-                    }else {
-                        Log.e("everyweekWithoutEndTime","true");
-
-                        setAlarmManager(startTime, id);
-                        db.collection("Events").document(doc.getId()).update("startTime", startTime.getSeconds() * 1000 + Constants.IntervalMonth);
                     }
+                    else
+                        cancelAlarmManager(id);
+
+                }else {
+                    setAlarmManager(startTime,id);
+                    List<Object> weekDays = (List<Object>) doc.get("weekDays");
+                    Calendar cal = Calendar.getInstance();
+                    cal.setTimeInMillis(currentTimeMillis());
+                    int start = cal.get(Calendar.DAY_OF_WEEK);
+                    start--;
+                    int i=1;
+                    while ((boolean)weekDays.get((start+1)%7)==false){
+                        start++;
+                        i++;
+                    }
+                    db.collection("Events").document(doc.getId()).
+                            update("startTime",new Timestamp(new Date(startTime.getSeconds()*1000+i*AlarmManager.INTERVAL_DAY)));
+
+                }
                 break;
             }
-            case "everyMonth":{
+            case"ConstantDays":{
                 if(endTime!=null){
                     if(startTime.getSeconds()<=endTime.getSeconds()){
+                        setAlarmManager(startTime   ,id);
+                        db.collection("Events").document(doc.getId()).update("startTime",new Timestamp(new Date(startTime.getSeconds()*1000+doc.getLong("interval")*AlarmManager.INTERVAL_DAY)));
+                    }else
+                        cancelAlarmManager(id);
 
-
-                    }
+                }else{
+                    setAlarmManager(startTime,id);
+                    db.collection("Events").document(doc.getId()).update("startTime",new Timestamp(new Date(startTime.getSeconds()*1000+doc.getLong("interval")*AlarmManager.INTERVAL_DAY)));
                 }
                 break;
             }
