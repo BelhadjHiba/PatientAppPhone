@@ -13,6 +13,7 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
 import android.Manifest;
+import android.app.AlarmManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -26,15 +27,23 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.common.util.concurrent.ListenableFuture;
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.type.DateTime;
 
 import java.lang.reflect.Type;
-import java.sql.Timestamp;
+import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Formatter;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.logging.SimpleFormatter;
+
+import static java.lang.System.currentTimeMillis;
 
 public class    MainActivity extends AppCompatActivity {
     private static final int PERMISSION_REQUEST_CAMERA = 0;
@@ -44,6 +53,8 @@ public class    MainActivity extends AppCompatActivity {
 
     private Button qrCodeFoundButton;
     private String qrCode;
+    private  SimpleDateFormat formatter =new SimpleDateFormat("dd-MM-yyyy");
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,21 +68,16 @@ public class    MainActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             List<DocumentSnapshot> myListOfDocuments = task.getResult().getDocuments();
-                            Log.e("Snapshot", String.valueOf(myListOfDocuments));
-                            for (DocumentSnapshot s:myListOfDocuments)
+                            for(int i=0; i<myListOfDocuments.size();i++)
                             {
-                                System.out.println(s.get("time").getClass().getName());
-                                Log.e("DOC", String.valueOf(s));
-                                 new AlarmHandler(getApplicationContext(), (com.google.firebase.Timestamp) s.get("time")).setAlarmManager();
-
-
+                                if(formatter.format(myListOfDocuments.get(i).getTimestamp("startTime").getSeconds()*1000).compareTo(formatter.format(new Date()))==0) {
+                                    new AlarmHandler(getApplicationContext()).scheduleRepeating(myListOfDocuments.get(i),i);
+                                }
                             }
+
                         }
-                    }
-                });
-
-        Toast.makeText(this, "Alarm set", Toast.LENGTH_SHORT).show();
-
+                }
+                    });
 //        final Context context = this;
 //        previewView = findViewById(R.id.activity_main_previewView);
 //
