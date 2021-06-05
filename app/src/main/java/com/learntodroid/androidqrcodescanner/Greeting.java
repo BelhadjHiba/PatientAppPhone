@@ -39,7 +39,6 @@ public class Greeting extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_greeting);
-//        patientId = getIntent().getStringExtra("patient_KEY");
         SESSION();
         System.out.println(patientId);
         final Context context = this;
