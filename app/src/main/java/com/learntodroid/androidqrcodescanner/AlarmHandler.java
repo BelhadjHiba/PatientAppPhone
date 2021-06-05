@@ -37,13 +37,14 @@ public class AlarmHandler {
 
     }
 //
-    public void setAlarmManager(Timestamp time, int id ) {
+    public void setAlarmManager(DocumentSnapshot doc, int id ) {
 //        alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
         AlarmManager alarmMgr=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, ExecutableService.class);
+        intent.putExtra("eventID",doc.getId());
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context, id, intent, 0);
         alarmMgr.setExact(AlarmManager.RTC_WAKEUP,
-                time.getSeconds()*1000,
+                doc.getTimestamp("startTime").getSeconds()*1000,
 //                1000,
                 alarmIntent);
 
@@ -67,14 +68,14 @@ public class AlarmHandler {
                 if (endTime != null) {
                     if (startTime.getSeconds() <= endTime.getSeconds()) {
                         Log.e("everydayWithEndTime","true");
-                        setAlarmManager(startTime, id);
+                        setAlarmManager(doc, id);
                         db.collection("Events").document(doc.getId()).update("startTime", new Timestamp(new Date(startTime.getSeconds() * 1000 + AlarmManager.INTERVAL_DAY)));
                     } else {
                         cancelAlarmManager(id);
                     }
                 } else {
                     Log.e("everydayWithoutEndTime","true");
-                    setAlarmManager(startTime, id);
+                    setAlarmManager(doc, id);
                     db.collection("Events").document(doc.getId()).update("startTime", new Timestamp(new Date(startTime.getSeconds() * 1000 + AlarmManager.INTERVAL_DAY)));
                 }
                 break;
@@ -83,7 +84,7 @@ public class AlarmHandler {
                 if (endTime != null) {
                     if(startTime.getSeconds()<endTime.getSeconds()) {
                         Log.e("everyWeekWithEndTime","true");
-                        setAlarmManager(doc.getTimestamp("startTime"),id);
+                        setAlarmManager(doc,id);
                         List<Object> weekDays = (List<Object>) doc.get("weekDays");
                         Calendar cal = Calendar.getInstance();
                         cal.setTimeInMillis(currentTimeMillis());
@@ -102,7 +103,7 @@ public class AlarmHandler {
                         cancelAlarmManager(id);
 
                 }else {
-                    setAlarmManager(startTime,id);
+                    setAlarmManager(doc,id);
                     List<Object> weekDays = (List<Object>) doc.get("weekDays");
                     Calendar cal = Calendar.getInstance();
                     cal.setTimeInMillis(currentTimeMillis());
@@ -122,13 +123,13 @@ public class AlarmHandler {
             case"ConstantDays":{
                 if(endTime!=null){
                     if(startTime.getSeconds()<=endTime.getSeconds()){
-                        setAlarmManager(startTime   ,id);
+                        setAlarmManager(doc   ,id);
                         db.collection("Events").document(doc.getId()).update("startTime",new Timestamp(new Date(startTime.getSeconds()*1000+doc.getLong("interval")*AlarmManager.INTERVAL_DAY)));
                     }else
                         cancelAlarmManager(id);
 
                 }else{
-                    setAlarmManager(startTime,id);
+                    setAlarmManager(doc,id);
                     db.collection("Events").document(doc.getId()).update("startTime",new Timestamp(new Date(startTime.getSeconds()*1000+doc.getLong("interval")*AlarmManager.INTERVAL_DAY)));
                 }
                 break;
