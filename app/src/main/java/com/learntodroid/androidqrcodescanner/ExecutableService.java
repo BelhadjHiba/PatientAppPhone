@@ -29,7 +29,7 @@ public class ExecutableService extends BroadcastReceiver {
                     {
 
                     }
-                     if(sightRate<50 )
+                    else if(sightRate<50 || (sightRate>=50 && hearingRate>=50) )
                     {
                         Intent alarmIntent = new Intent(context, WakeupAlarmActivity.class);
                         alarmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -37,13 +37,11 @@ public class ExecutableService extends BroadcastReceiver {
                         //open Activitiy
                         context.startActivity(alarmIntent);
                     }
-                    if(sightRate>=50 && hearingRate>=50){
-                        Intent alarmIntent = new Intent(context, WakeupAlarmActivity.class);
-                        alarmIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        alarmIntent.putExtra("Id",key);
-                        //open Activitiy
-                        context.startActivity(alarmIntent);
+                    else if(sightRate==0 && hearingRate==0)
+                    {
+//                        Intent alarmIntent= new Intent(context,)
                     }
+
             }
         });
 
