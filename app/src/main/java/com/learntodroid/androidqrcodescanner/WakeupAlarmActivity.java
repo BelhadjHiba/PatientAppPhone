@@ -76,109 +76,25 @@ private   ListenerRegistration rgDrawer,rg,registration0;
             ID= Save.read(this,"patientID",null);
             Log.e("EVentId",eventID);
             Log.e("patientId",ID);
-         db.collection("Patient").document(ID).collection("Events").document(eventID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-             @Override
-             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                 System.out.println((ArrayList<Boolean>)task.getResult().get("instructions"));
-                 instructions = (ArrayList<Boolean>) task.getResult().get("instructions");
-                 Log.e("instructions", String.valueOf(instructions));
-                rgDrawer=db.collection("House").document("Kitchen").collection("Drawer")
-                 .whereEqualTo("isLocked",false).whereEqualTo("DrawerLed",true).addSnapshotListener(new EventListener<QuerySnapshot>() {
-                     @Override
-                     public void onEvent(@Nullable  QuerySnapshot value, @Nullable  FirebaseFirestoreException error) {
-                         if (error != null) {
-                            Log.e("Error", String.valueOf(error));
-                         }
-                         if(value!=null){
-                             for(QueryDocumentSnapshot doc : value)
-                             { if(!doc.getBoolean("drawerState") && instructions.get(0)){
-                                 text = "Open The Medicine Drawer In The Kitchen";
-                                 runnable.run();
-                             }
-                             else{
-                                 if(doc.getBoolean("drawerState")){
-                                     db.collection("Patient").document(ID).collection("Statement").add(new Statement("open",new Timestamp(new Date(System.currentTimeMillis())),doc.getId()));
-//                                     Log.e("Statement1",state.getObject()+" "+state.getVerb()+"ed at"+state.getTime().getSeconds());
-                                 }
-                                 rg= db.collection("/House/Kitchen/Drawer/MedDrawer/PillBox").whereEqualTo("isLocked",false).whereEqualTo("boxLed",true).
-                                 addSnapshotListener(new EventListener<QuerySnapshot>() {
-                                     @Override
-                                     public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                                         if (error != null) {
-                                             Log.e(TAG, "OnEvent ", error);
-                                             return;
-                                         }
-                                         if (value != null) {
-                                             Log.e("Document changes", String.valueOf(value)) ;
+            if(eventID=="Dinner" ||"Lunch"==eventID || "Snack"==eventID)
+            {
+                Eat();
+            }
+            else {
+               if( Constants.db.collection("/House/Kitchen/Drawer/MedDrawer/PillBox").document(eventID).get()!=null)
+               {
+                   Med();
+               }
+               else if(Constants.db.collection("/House/Kitchen/Drawer/MedDrawer/SyropBox").document(eventID).get()!=null)
+               {
+                    Syrup();
+               }
+               else
+               {
+                   Dropper();
 
-                                             for (QueryDocumentSnapshot pillBox : value) {
-                                                 if (!pillBox.getBoolean("boxState")  && instructions.get(1)==true){
-                                                     text = "Open The Pillbox";
-                                                     runnable.run();
-                                                     Log.e("doc id","worked ");
-                                                 }
-                                                 else {
-                                                     if(pillBox.getBoolean("boxState"))
-                                                     {
-                                                         db.collection("Patient").document(ID).collection("Statement").add(new Statement("open",new Timestamp(new Date(System.currentTimeMillis())),pillBox.getId()));
-
-                                                     }
-                                                     System.out.println("--------------Opened");
-                                                     registration0 = pillBox.getReference().collection("Slot").whereEqualTo("isLocked",false).addSnapshotListener(new EventListener<QuerySnapshot>() {
-                                                         @Override
-                                                         public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
-                                                             if (error != null) {
-                                                                 Log.e(TAG, "OnEvent ", error);
-                                                                 return;
-                                                             }
-                                                             if (value != null) {
-                                                                 for (QueryDocumentSnapshot doc : value){
-                                                                     System.out.println(doc);
-                                                                     if (instructions.get(2)==true && doc.getBoolean("slotState")==false){
-                                                                         text = "Open the luminous slot";
-                                                                         runnable.run();
-                                                                         Log.e("doc id",doc.getId());
-                                                                     }
-                                                                     else if (instructions.get(3)==true && !doc.getBoolean("isEmpty")) {
-                                                                         db.collection("Patient").document(ID).collection("Statement").add(new Statement("open",new Timestamp(new Date(System.currentTimeMillis())),doc.getId()));
-                                                                         text = "Take Pills in the luminous slot";
-                                                                         runnable.run();
-                                                                         Log.e("doc id",doc.getId());
-                                                                     }
-                                                                     if (doc.getBoolean("isEmpty") == true) {
-                                                                         db.collection("Patient").document(ID).collection("Statement").add(new Statement("Drink",new Timestamp(new Date(System.currentTimeMillis())),pillBox.getId()));
-                                                                         Log.d("finished",doc.getId()+"Done");
-                                                                         handler.removeCallbacks(runnable);
-                                                                         if (mTts != null) {
-                                                                             Log.v(TAG, "onDestroy: shutdown TTS");
-                                                                             mTts.stop();
-                                                                             mTts.shutdown();
-                                                                         }
-                                                                         finish();
-
-                                                                     }
-
-                                                                 }
-                                                             }
-                                                         }
-                                                     });
-
-                                                 }
-                                             }
-                                         }
-                                     }
-                                 });
-                                 }
-                             }
-                         }
-                     }
-                 });
-
-
-             }
-         });
-
-        Log.e("Alarm","WORKING");
+               }            }
+            Log.e("Alarm","WORKING");
 
 
 
@@ -242,26 +158,123 @@ private   ListenerRegistration rgDrawer,rg,registration0;
     setVolumeControlStream(AudioManager.STREAM_MUSIC);
         }
 
+    private void Eat() {
+    }
 
-//    void speak(String s){
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            Log.v(TAG, "Speak new API");
-//            Bundle bundle = new Bundle();
-//            bundle.putInt(TextToSpeech.Engine.KEY_PARAM_STREAM, AudioManager.STREAM_MUSIC);
-//            mTts.speak(s, TextToSpeech.QUEUE_ADD, bundle, null);
-//        } else {
-//            Log.v(TAG, "Speak old API");
-//            HashMap<String, String> param = new HashMap<>();
-//            param.put(TextToSpeech.Engine.KEY_PARAM_STREAM, String.valueOf(AudioManager.STREAM_MUSIC));
-//            mTts.speak(s, TextToSpeech.QUEUE_ADD, param);
-//        }
-//    }
+    private void Dropper() {
+    }
 
+    private void Syrup() {
+
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
         rgDrawer.remove();
         rg.remove();
         registration0.remove();
+    }
+    private void Med(){
+        db.collection("Patient").document(ID).collection("Events").document(eventID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                System.out.println((ArrayList<Boolean>)task.getResult().get("instructions"));
+                instructions = (ArrayList<Boolean>) task.getResult().get("instructions");
+                Log.e("instructions", String.valueOf(instructions));
+                rgDrawer=db.collection("House").document("Kitchen").collection("Drawer")
+                        .whereEqualTo("isLocked",false).whereEqualTo("DrawerLed",true).addSnapshotListener(new EventListener<QuerySnapshot>() {
+                            @Override
+                            public void onEvent(@Nullable  QuerySnapshot value, @Nullable  FirebaseFirestoreException error) {
+                                if (error != null) {
+                                    Log.e("Error", String.valueOf(error));
+                                }
+                                if(value!=null){
+                                    for(QueryDocumentSnapshot doc : value)
+                                    { if(!doc.getBoolean("drawerState") && instructions.get(0)){
+                                        text = "Open The Medicine Drawer In The Kitchen";
+                                        runnable.run();
+                                    }
+                                    else{
+                                        if(doc.getBoolean("drawerState")){
+                                            db.collection("Patient").document(ID).collection("Statement").add(new Statement("open",new Timestamp(new Date(System.currentTimeMillis())),doc.getId()));
+//                                     Log.e("Statement1",state.getObject()+" "+state.getVerb()+"ed at"+state.getTime().getSeconds());
+                                        }
+                                        rg= db.collection("/House/Kitchen/Drawer/MedDrawer/PillBox").whereEqualTo("isLocked",false).whereEqualTo("boxLed",true).
+                                                addSnapshotListener(new EventListener<QuerySnapshot>() {
+                                                    @Override
+                                                    public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                                                        if (error != null) {
+                                                            Log.e(TAG, "OnEvent ", error);
+                                                            return;
+                                                        }
+                                                        if (value != null) {
+                                                            Log.e("Document changes", String.valueOf(value)) ;
+
+                                                            for (QueryDocumentSnapshot pillBox : value) {
+                                                                if (!pillBox.getBoolean("boxState")  && instructions.get(1)==true){
+                                                                    text = "Open The Pillbox";
+                                                                    runnable.run();
+                                                                    Log.e("doc id","worked ");
+                                                                }
+                                                                else {
+                                                                    if(pillBox.getBoolean("boxState"))
+                                                                    {
+                                                                        db.collection("Patient").document(ID).collection("Statement").add(new Statement("open",new Timestamp(new Date(System.currentTimeMillis())),pillBox.getId()));
+
+                                                                    }
+                                                                    System.out.println("--------------Opened");
+                                                                    registration0 = pillBox.getReference().collection("Slot").whereEqualTo("isLocked",false).addSnapshotListener(new EventListener<QuerySnapshot>() {
+                                                                        @Override
+                                                                        public void onEvent(@Nullable QuerySnapshot value, @Nullable FirebaseFirestoreException error) {
+                                                                            if (error != null) {
+                                                                                Log.e(TAG, "OnEvent ", error);
+                                                                                return;
+                                                                            }
+                                                                            if (value != null) {
+                                                                                for (QueryDocumentSnapshot doc : value){
+                                                                                    System.out.println(doc);
+                                                                                    if (instructions.get(2)==true && doc.getBoolean("slotState")==false){
+                                                                                        text = "Open the luminous slot";
+                                                                                        runnable.run();
+                                                                                        Log.e("doc id",doc.getId());
+                                                                                    }
+                                                                                    else if (instructions.get(3)==true && !doc.getBoolean("isEmpty")) {
+                                                                                        db.collection("Patient").document(ID).collection("Statement").add(new Statement("open",new Timestamp(new Date(System.currentTimeMillis())),doc.getId()));
+                                                                                        text = "Take Pills in the luminous slot";
+                                                                                        runnable.run();
+                                                                                        Log.e("doc id",doc.getId());
+                                                                                    }
+                                                                                    if (doc.getBoolean("isEmpty") == true) {
+                                                                                        db.collection("Patient").document(ID).collection("Statement").add(new Statement("Drink",new Timestamp(new Date(System.currentTimeMillis())),pillBox.getId()));
+                                                                                        Log.d("finished",doc.getId()+"Done");
+                                                                                        handler.removeCallbacks(runnable);
+                                                                                        if (mTts != null) {
+                                                                                            Log.v(TAG, "onDestroy: shutdown TTS");
+                                                                                            mTts.stop();
+                                                                                            mTts.shutdown();
+                                                                                        }
+                                                                                        finish();
+
+                                                                                    }
+
+                                                                                }
+                                                                            }
+                                                                        }
+                                                                    });
+
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                });
+                                    }
+                                    }
+                                }
+                            }
+                        });
+
+
+            }
+        });
     }
 }
