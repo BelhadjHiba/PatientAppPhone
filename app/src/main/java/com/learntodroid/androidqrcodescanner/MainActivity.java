@@ -1,4 +1,4 @@
-package com.learntodroid.androidqrcodescanner;
+    package com.learntodroid.androidqrcodescanner;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
