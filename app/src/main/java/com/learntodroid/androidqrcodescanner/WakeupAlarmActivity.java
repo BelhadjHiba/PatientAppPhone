@@ -1,35 +1,19 @@
 package com.learntodroid.androidqrcodescanner;
 
-import android.annotation.TargetApi;
-import android.app.KeyguardManager;
-
-import android.content.Intent;
 import android.media.AudioManager;
-import android.media.MediaDrm;
-import android.net.nsd.NsdManager;
-import android.os.Build;
 import android.os.Bundle;
 
 import android.os.Handler;
 import android.speech.tts.TextToSpeech;
 import android.util.Log;
-import android.view.View;
-import android.view.WindowManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import android.os.VibrationEffect;
-import android.os.Vibrator;
-import android.widget.Button;
-import android.widget.ListAdapter;
-import android.widget.Switch;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -40,13 +24,8 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.learntodroid.androidqrcodescanner.utils.Save;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.Scanner;
-import java.util.concurrent.TimeUnit;
 
 
 public class WakeupAlarmActivity extends AppCompatActivity {
@@ -56,7 +35,7 @@ public class WakeupAlarmActivity extends AppCompatActivity {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private static Boolean  stateBox=true;
     private Boolean Stop=false;
-   String text = "",ID,eventID;
+   String text = "",ID, eventName,eventID;
 private   ListenerRegistration rgDrawer,rg,registration0;
     Handler handler = new Handler();
     List<Boolean> instructions=new ArrayList<Boolean>();
@@ -69,23 +48,23 @@ private   ListenerRegistration rgDrawer,rg,registration0;
     };
     @Override
         protected void onCreate(Bundle savedInstanceState) {
-
             super.onCreate(savedInstanceState);
             setContentView(R.layout.activity_wakeup);
-            eventID=getIntent().getStringExtra("Id");
-            ID= Save.read(this,"patientID",null);
-            Log.e("EVentId",eventID);
+            eventName =getIntent().getStringExtra("name");
+            eventID=getIntent().getStringExtra("eventID");
+            Log.e("EVentId", eventName);
+            ID=Save.read(this,"patientID",null);
             Log.e("patientId",ID);
-            if(eventID=="Dinner" ||"Lunch"==eventID || "Snack"==eventID)
+            if(eventName =="Dinner" ||"Lunch"== eventName || "Snack"== eventName)
             {
                 Eat();
             }
             else {
-               if( Constants.db.collection("/House/Kitchen/Drawer/MedDrawer/PillBox").document(eventID).get()!=null)
+               if( Constants.db.collection("/House/Kitchen/Drawer/MedDrawer/PillBox").document(eventName).get()!=null)
                {
                    Med();
                }
-               else if(Constants.db.collection("/House/Kitchen/Drawer/MedDrawer/SyropBox").document(eventID).get()!=null)
+               else if(Constants.db.collection("/House/Kitchen/Drawer/MedDrawer/SyropBox").document(eventName).get()!=null)
                {
                     Syrup();
                }
@@ -93,7 +72,8 @@ private   ListenerRegistration rgDrawer,rg,registration0;
                {
                    Dropper();
 
-               }            }
+               }
+            }
             Log.e("Alarm","WORKING");
 
 
@@ -175,7 +155,7 @@ private   ListenerRegistration rgDrawer,rg,registration0;
         registration0.remove();
     }
     private void Med(){
-        db.collection("Patient").document(ID).collection("Events").document(eventID).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        db.collection("Patient").document(ID).collection("Events").document(eventName).get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 System.out.println((ArrayList<Boolean>)task.getResult().get("instructions"));

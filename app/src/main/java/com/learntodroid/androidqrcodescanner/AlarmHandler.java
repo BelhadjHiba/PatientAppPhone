@@ -41,7 +41,9 @@ public class AlarmHandler {
 //        alarmMgr = (AlarmManager)this.getSystemService(Context.ALARM_SERVICE);
         AlarmManager alarmMgr=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, ExecutableService.class);
+        intent.putExtra("name",doc.getString("title"));
         intent.putExtra("eventID",doc.getId());
+
         PendingIntent alarmIntent = PendingIntent.getBroadcast(context, id, intent, 0);
         alarmMgr.setExact(AlarmManager.RTC_WAKEUP,
                 doc.getTimestamp("startTime").getSeconds()*1000,
