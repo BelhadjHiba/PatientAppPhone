@@ -161,12 +161,11 @@ public class    MainActivity extends AppCompatActivity {
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
 
                  try{
-                     db.collection("Patient").document(qrCode).get();
+                        db.collection("Patient").document(qrCode).get();
                         Save.save(getApplicationContext(), "patientID", qrCode);
                         Intent intent = new Intent(getApplicationContext(), Greeting.class);
                         startActivity(intent);
                         finish();
-
                 }
                  catch (Exception e)
                  {

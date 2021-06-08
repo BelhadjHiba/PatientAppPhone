@@ -44,6 +44,7 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED"></action>
             </intent-filter>
         </receiver>
+        <activity android:name=".TOPActivity" android:theme="@style/AppTheme"/>
         <activity
 
             android:name=".WakeupAlarmActivity"

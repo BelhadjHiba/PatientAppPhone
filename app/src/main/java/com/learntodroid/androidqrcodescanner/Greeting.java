@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.se.omapi.Session;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -27,6 +28,7 @@ import java.util.List;
 public class Greeting extends AppCompatActivity {
     private String patientId,session;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private TextView text;
 
     private  SimpleDateFormat formatter =new SimpleDateFormat("dd-MM-yyyy");
 
@@ -39,7 +41,9 @@ public class Greeting extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_greeting);
+
         SESSION();
+        text=findViewById(R.id.greeting);
         System.out.println(patientId);
         final Context context = this;
         db.collection("Patient").document(patientId).get().addOnSuccessListener(this, new OnSuccessListener<DocumentSnapshot>() {
@@ -47,7 +51,7 @@ public class Greeting extends AppCompatActivity {
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 if (documentSnapshot.exists()){
                     String pName = documentSnapshot.getString("name");
-                    Toast.makeText(context, "hi " + pName + ", hava a nice Day", Toast.LENGTH_SHORT).show();
+                    text.setText("hi "+pName+" have a nice day");
 
                 } else Toast.makeText(context, "Does not Exist", Toast.LENGTH_SHORT).show();
             }
