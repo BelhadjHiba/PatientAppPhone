@@ -2,9 +2,12 @@ package com.learntodroid.androidqrcodescanner;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.se.omapi.Session;
 import android.util.Log;
@@ -43,6 +46,16 @@ public class Greeting extends AppCompatActivity {
         setContentView(R.layout.activity_greeting);
 
         SESSION();
+
+        if(ActivityCompat.checkSelfPermission(Greeting.this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+        {
+            Intent intent =new Intent(this,LocationService.class);
+            startService(intent);
+        }
+        else
+        {
+            ActivityCompat.requestPermissions(Greeting.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},44);
+        }
         text=findViewById(R.id.greeting);
         System.out.println(patientId);
         final Context context = this;
@@ -100,5 +113,19 @@ public class Greeting extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
         finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Intent intent =new Intent(this,LocationService.class);
+        startService(intent);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Intent intent =new Intent(this,LocationService.class);
+        startService(intent);
     }
 }
