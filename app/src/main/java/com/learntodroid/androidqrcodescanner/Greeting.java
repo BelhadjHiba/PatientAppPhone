@@ -38,8 +38,11 @@ public class Greeting extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        Intent intent1 =new Intent(this,TriggerDevice.class);
+        startService(intent1);
 
     }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -74,24 +77,7 @@ public class Greeting extends AppCompatActivity {
                 Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
             }
         });
-        FirebaseFirestore.getInstance()
-                .collection("Patient").document(patientId).collection("Events")
-                .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            List<DocumentSnapshot> myListOfDocuments = task.getResult().getDocuments();
-                            for(int i=0; i<myListOfDocuments.size();i++)
-                            {
-                                if(formatter.format(myListOfDocuments.get(i).getTimestamp("startTime").getSeconds()*1000).compareTo(formatter.format(new Date()))==0) {
-                                    new AlarmHandler(getApplicationContext()).scheduleRepeating(myListOfDocuments.get(i),i);
-                                }
-                            }
 
-                        }
-                    }
-                });
     }
 
     private void SESSION() {
@@ -120,6 +106,8 @@ public class Greeting extends AppCompatActivity {
         super.onDestroy();
         Intent intent =new Intent(this,LocationService.class);
         startService(intent);
+        Intent intent1 =new Intent(this,TriggerDevice.class);
+        startService(intent1);
     }
 
     @Override
@@ -127,5 +115,7 @@ public class Greeting extends AppCompatActivity {
         super.onStop();
         Intent intent =new Intent(this,LocationService.class);
         startService(intent);
+        Intent intent1 =new Intent(this,TriggerDevice.class);
+        startService(intent1);
     }
 }

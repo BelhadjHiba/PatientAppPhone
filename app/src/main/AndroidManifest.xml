@@ -47,7 +47,13 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED"></action>
             </intent-filter>
         </receiver>
-        <activity android:name=".TOPActivity" android:theme="@style/AppTheme"/>
+        <activity android:name=".TOPActivity" android:theme="@style/AppTheme"
+            android:parentActivityName=".MainActivity"
+            android:excludeFromRecents="true"
+            android:showOnLockScreen="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:showForAllUsers="true"/>
         <activity
 
             android:name=".WakeupAlarmActivity"
@@ -60,6 +66,7 @@
 
             />
         <service android:name=".LocationService"/>
+        <service android:name=".TriggerDevice"/>
     </application>
 
 
